@@ -2,15 +2,6 @@ export const jsonConfig = {
   default: null,
   description: "General report settings 1",
   properties: {
-    testButton: {
-      format: "button",
-      title: "New Analysis Module",
-      options: {
-        button: {
-          action: "button1CB"
-        }
-      }
-    },
     analysis_modules: {
       description: "List of analysis modules",
       format: "tabs",

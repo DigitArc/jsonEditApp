@@ -1,58 +1,75 @@
 // VENDORS
 import * as $ from "jquery";
-import "./assets/css/bootstrap.min.css";
-import "./assets/fontawesome/css/all.css";
 import "./assets/js/bootstrap.bundle";
+import "./app/vendor-imports";
 import "@json-editor/json-editor";
 
 // JSON DATA
-import { jsonConfig } from "./assets/data/json-config.data";
-import { jsonResources } from "./assets/data/json-resources.data";
+import { jsonConfig } from "./assets/data/json-config-allrol.resources";
+import { jsonResources } from "./assets/data/json-config-allrol.data";
 
 JSONEditor.defaults.options.theme = "bootstrap4";
 JSONEditor.defaults.options.iconlib = "fontawesome5";
-// const analysisConfig = {
-//   default: null,
-//   description: "General report settings 1",
-//   properties: {
-//     analysis_modules: jsonConfig.properties.analysis_modules
-//   },
-//   required: ["analysis_modules"],
-//   title: "Report Settings",
-//   type: "object"
-// };
-const analysisConfig = { ...jsonConfig.properties.analysis_modules.items };
-const analysisEditor = new JSONEditor(
-  document.getElementById("analysisEditorHolder"),
-  { schema: analysisConfig }
-);
-analysisEditor.setValue({ analysis_modules: jsonResources.analysis_modules });
-// REMOVE LIST DATA FROM ASIDE ON MODAL.
-// document.querySelector("#item").style.display = "none";
-JSONEditor.defaults.callbacks = {
-  button: {
-    button1CB: function(jseditor, e) {
-      // console.log(e);
-      // console.log("button1CB", jseditor.jsoneditor.getValue());
-      $("#exampleModal").modal("toggle");
-    }
+
+var mainDataPreprocess;
+
+// const editor = new JSONEditor(document.getElementById("editor_holder"), {
+//   schema: jsonConfig
+// });
+// editor.setValue(jsonResources);
+console.log(jsonResources.preprocess_modules);
+console.log(jsonConfig.properties.preprocess_modules)
+mainDataPreprocess = jsonConfig.properties.preprocess_modules.items.oneOf.map(item => {
+  if (item.properties.config.properties) {
+    const itemsToRender = Object.keys(item.properties.config.properties).map(key => ({ key, type: item.properties.config.properties[key].type }))
+    return { name: item.title, items: itemsToRender };
   }
-};
+}).filter(res => res && res);
 
-const submitAnalysisModalButton = document.getElementById(
-  "analysisModalButton"
-);
-submitAnalysisModalButton.addEventListener("click", () => {
-  console.log(analysisEditor.getValue());
-  const newAnalysisModules = analysisEditor.getValue();
-  const current = editor.getValue().analysis_modules;
-  console.log([...current, newAnalysisModules]);
-  editor.setValue({ analysis_modules: [...current, newAnalysisModules] });
+const ul = document.querySelector("#preprocessModuleList");
+
+jsonResources.preprocess_modules.map(item => {
+  $(ul).append(`<li class="list-group-item">
+    <a href="javascript:void(0)" class="item" >${item.name}</a></li>`);
+})
+
+
+$(".item").on("click", function (e) {
+  const text = e.target.innerText;
+
+  const selectedModule = mainDataPreprocess.filter(item => item.name === text);
+  const $tabs = $("#tabs");
+  $tabs.html("");
+
+  $tabs.append(`
+    <li class="nav-item">
+    <a class="nav-link active" data-toggle="tab" href="#home">Module Settings</a>
+  </li>
+    `);
+
+  if (selectedModule.length > 0) {
+
+    $("#home").html("");
+    selectedModule[0].items.map((item, index) => {
+
+      if (item.type === "string") {
+        console.log($("#home"));
+
+        $("#home").append(` <p> ${item.key} </p> `);
+      }
+      else if (item.type === "array") {
+        $tabs.append(`
+        <li class="nav-item">
+                      <a class="nav-link" data-toggle="tab" href="#menu${index}">${item.key}</a>
+                    </li>
+        `);
+      }
+
+
+    })
+  }
+
+
+
 });
-
-const element = document.getElementById("editor_holder");
-
-const editor = new JSONEditor(document.getElementById("editor_holder"), {
-  schema: jsonConfig
-});
-editor.setValue(jsonResources);
+console.log(mainDataPreprocess)
