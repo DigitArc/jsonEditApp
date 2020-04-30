@@ -28,7 +28,7 @@
     "@json-editor/json-editor": "^2.1.0",
     "babel-loader": "^8.1.0",
     "css-loader": "^3.4.2",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "style-loader": "^1.1.3"
   }
 }
